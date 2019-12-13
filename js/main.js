@@ -1,64 +1,41 @@
+import { apiCall } from "./apiCall.js";
+import { loadHighscore, deleteHighscore } from "./highscore.js";
+import { currentLevel } from "./levels.js";
+
 window.addEventListener("load", init);
 
 // Globals
-
-// Available Levels
-const levels = {
-    easy: 5,
-    medium: 3,
-    hard: 2
-};
-
-// To change level
-const currentLevel = levels.easy;
-
-let time = currentLevel;
-let score = 0;
-let isPlaying;
+let time = currentLevel,
+    score = 0,
+    isPlaying;
 
 // DOM Elements
-const wordInput = document.getElementById("word-input"),
+export const seconds = document.getElementById("seconds"),
     currentWord = document.getElementById("current-word"),
-    scoreDisplay = document.getElementById("score"),
-    timeDisplay = document.getElementById("time"),
+    wordInput = document.getElementById("word-input"),
     message = document.getElementById("message"),
-    seconds = document.getElementById("seconds");
+    timeDisplay = document.getElementById("time"),
+    scoreDisplay = document.getElementById("score"),
+    highscoreDisplay = document.getElementById("highscore"),
+    deleteBtn = document.getElementById("delete");
 
-const words = [
-    "hat",
-    "river",
-    "lucky",
-    "statue",
-    "generate",
-    "stubborn",
-    "cocktail",
-    "runaway",
-    "joke",
-    "developer",
-    "establishment",
-    "hero",
-    "javascript",
-    "nutrition",
-    "revolver",
-    "echo",
-    "siblings",
-    "investigate",
-    "horrendous",
-    "symptom",
-    "laughter",
-    "magic",
-    "master",
-    "space",
-    "definition"
-];
+export function showSeconds() {
+    seconds.innerHTML = currentLevel;
+}
 
 // Initialize Game
 function init() {
     // Show number of seconds in UI
-    seconds.innerHTML = currentLevel;
+    showSeconds();
 
-    // Load word from array
-    showWord(words);
+    // Show a random word
+    apiCall();
+
+    // Load highscore from local storage
+    loadHighscore();
+
+    // Delete highscore
+    deleteBtn.addEventListener("click", deleteHighscore);
 
     // Start matching on word input
     wordInput.addEventListener("input", startMatch);
@@ -73,15 +50,6 @@ function init() {
     setInterval(checkStatus, 50);
 }
 
-// Pick and show random word
-function showWord(words) {
-    // Generate random array index
-    const randIndex = Math.floor(Math.random() * words.length);
-
-    // Output a random word
-    currentWord.innerHTML = words[randIndex];
-}
-
 // Start match
 function startMatch() {
     // Change color (red => green)
@@ -90,9 +58,10 @@ function startMatch() {
     if (matchWords()) {
         isPlaying = true;
         time = currentLevel + 1; // one second above the time limit
-        showWord(words);
+        apiCall();
         wordInput.value = "";
         score++;
+        console.log("score: " + score);
 
         // Change color
         scoreDisplay.className = "text-success";
@@ -104,6 +73,29 @@ function startMatch() {
         window.setTimeout(() => {
             wordInput.style.border = "none";
         }, 2000);
+
+        // Update highscore in local storage
+        if (score > localStorage.getItem("highscore")) {
+            // Update highscore in local storage
+            localStorage.setItem("highscore", JSON.stringify(score));
+
+            // Load highscore from local storage
+            loadHighscore();
+
+            console.log(
+                "highscore updated!",
+                localStorage.getItem("highscore")
+            );
+
+            // Display highscore
+            highscoreDisplay.innerHTML = score;
+
+            // Change color for two seconds
+            highscoreDisplay.className = "text-success";
+            window.setTimeout(() => {
+                highscoreDisplay.className = "";
+            }, 2000);
+        }
     }
 
     // If score is -1, display 0
