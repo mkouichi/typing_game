@@ -2,9 +2,9 @@ import { showSeconds } from "./main.js";
 
 // Available Levels
 const difficulty = {
-    easy: 5,
-    medium: 3,
-    hard: 2
+    easy: 7,
+    medium: 5,
+    hard: 3
 };
 
 // To change level
@@ -13,7 +13,7 @@ let currentLevel = difficulty[level.value];
 
 level.addEventListener("change", selectLevel);
 
-function selectLevel(e) {
+function selectLevel() {
     currentLevel = difficulty[level.value];
     showSeconds();
 }

@@ -1,4 +1,3 @@
-import { apiCall } from "./apiCall.js";
 import { loadHighscore, deleteHighscore } from "./highscore.js";
 import { currentLevel } from "./levels.js";
 
@@ -28,9 +27,6 @@ function init() {
     // Show number of seconds in UI
     showSeconds();
 
-    // Show a random word
-    apiCall();
-
     // Load highscore from local storage
     loadHighscore();
 
@@ -58,7 +54,13 @@ function startMatch() {
     if (matchWords()) {
         isPlaying = true;
         time = currentLevel + 1; // one second above the time limit
-        apiCall();
+
+        // API call
+        $.get("/api", data => {
+            console.log("Data Loaded: " + data);
+            $("#current-word").text(data);
+        });
+
         wordInput.value = "";
         score++;
         console.log("score: " + score);
@@ -119,7 +121,6 @@ function matchWords() {
         message.classList.add("text-success");
         return true;
     } else {
-        message.innerHTML = "";
         return false;
     }
 }
